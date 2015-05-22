@@ -3,7 +3,9 @@ EntityFu
 --------
 
 A simple, fast entity component system written in C++.
-First built for the game [Songbringer](http://songbringer.com).
+Originally built for the game [Songbringer](http://songbringer.com) and adapted for release.
+
+Only two files need to be included in your game project: `EntityFu.h` and `EntityFu.cpp`.
 
 Basically:
 - An entity is simply just an integer ID.
