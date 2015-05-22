@@ -30,7 +30,7 @@ struct HealthComponent : Entity::Component
 /// Assign unique class IDs from 0 to `numClassIds` - 1
 static int _id = 0;
 int HealthComponent::classId = _id++;
-int Entity::Component::numClassIds = _id++; // also critical to assign `numClassIds`
+int Entity::Component::numClassIds = _id; // also critical to assign `numClassIds`
 
 /// An example `Ent`.
 struct System::Ent
