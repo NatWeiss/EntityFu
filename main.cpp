@@ -1,7 +1,7 @@
 ///
 /// [EntityFu](https://github.com/NatWeiss/EntityFu)
-///
-/// Example code.
+/// A simple, fast entity component system written in C++.
+/// Under the MIT license.
 ///
 
 #include "EntityFu.h"
@@ -44,7 +44,6 @@ struct System::Ent
 	{}
 };
 
-
 /// An example system.
 struct HealthSystem : System
 {
@@ -56,7 +55,7 @@ struct HealthSystem : System
 			Ent e(eid);
 			
 			// always double check the `eid` is good because sometimes it is necessary for
-			// `forAllEntities` loops over a range that doesn't have active entities
+			// `forAllEntities` to loop over a range that doesn't have active entities
 			if (e.health.isEmpty())
 				continue;
 			
@@ -73,7 +72,6 @@ struct HealthSystem : System
 	}
 };
 
-// Main.
 int main(int argc, const char * argv[])
 {
 	// create an entity with one component
