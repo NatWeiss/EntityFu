@@ -1,12 +1,14 @@
 ///
-/// C O U R A G E
+/// [EntityFu](https://github.com/NatWeiss/EntityFu)
+/// A simple, fast entity component system written in C++.
+/// Under the MIT license.
 ///
 
 #include "EntityFu.h"
 #include <stdio.h>
 
 /// Turn this on to have a faster yet riskier ECS.
-#define kTrustPointers 1
+#define kTrustPointers 0
 
 /// Auto-define a log method.
 #ifndef Log
