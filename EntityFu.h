@@ -6,8 +6,6 @@
 
 #pragma once
 
-typedef unsigned int Cid; // Component-ID
-
 class Entity
 {
 	public:
