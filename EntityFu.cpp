@@ -5,13 +5,13 @@
 ///
 
 #include "EntityFu.h"
-#include <stdio.h>
 
 /// Turn this on to have a faster yet riskier ECS.
 #define kTrustPointers 0
 
 /// Auto-define a log method.
 #ifndef Log
+	#include <stdio.h>
 	#define Log(...) {printf(__VA_ARGS__); printf("\n");}
 #endif
 
@@ -25,8 +25,8 @@ static int verbosity = 0;
 
 bool* Entity::entities = nullptr;
 Entity::Component*** Entity::components = nullptr;
-Entity::eidType* Entity::minEids = nullptr;
-Entity::eidType* Entity::maxEids = nullptr;
+Eid* Entity::minEids = nullptr;
+Eid* Entity::maxEids = nullptr;
 
 void Entity::alloc()
 {
@@ -41,10 +41,10 @@ void Entity::alloc()
 		entities[eid] = false;
 
 	// allocate components
-	auto max = Component::numClassIds;
+	auto max = Component::numCids;
 	components = new Component**[max];
-	minEids = new eidType[max];
-	maxEids = new eidType[max];
+	minEids = new Eid[max];
+	maxEids = new Eid[max];
 	for (Cid i = 0; i < max; i++)
 	{
 		// allocate component array
@@ -68,7 +68,7 @@ void Entity::dealloc()
 	
 	if (components != nullptr)
 	{
-		for (Cid i = 0; i < Component::numClassIds; i++)
+		for (Cid i = 0; i < Component::numCids; i++)
 			if (components[i] != nullptr)
 				delete [] components[i]; // note this doesn't destroy the components, just the array
 		delete [] components;
@@ -90,13 +90,13 @@ Eid Entity::create()
 	// auto allocate
 	Entity::alloc();
 	
-	eidType eid = 1;
+	Eid eid = 1;
 	for (; eid < kMaxEid && entities[eid]; ++eid)
 	{
 	}
 
 	if (eid < 1 || eid >= kMaxEid)
-		{Log("Maximum number of entities reached!");}
+		{Log("Maximum number of entities reached!");} // this should probably be an assertion
 	else
 		entities[eid] = true;
 
@@ -115,14 +115,14 @@ int Entity::count()
 	return ret;
 }
 
-void Entity::destroyNow(eidType eid)
+void Entity::destroyNow(Eid eid)
 {
 	if (eid == 0)
 		return;
 	if (verbosity > 0)
 		{Log("Entity %u being destroyed", eid);}
 
-	for (Cid cid = 0; cid < Component::numClassIds; cid++)
+	for (Cid cid = 0; cid < Component::numCids; cid++)
 		Entity::removeComponent(eid, cid);
 	entities[eid] = false;
 }
@@ -134,25 +134,25 @@ void Entity::destroyAll()
 			Entity::destroyNow(eid);
 }
 
-Entity::eidType Entity::getMinEid(Cid cid)
+Eid Entity::getMinEid(Cid cid)
 {
-	if (cid < Component::numClassIds)
+	if (cid < Component::numCids)
 		return minEids[cid];
 	return kMaxEid - 1;
 }
 
-Entity::eidType Entity::getMaxEid(Cid cid)
+Eid Entity::getMaxEid(Cid cid)
 {
-	if (cid < Component::numClassIds)
+	if (cid < Component::numCids)
 		return maxEids[cid];
 	return 1;
 }
 
-void Entity::addComponent(eidType eid, Component* c, Cid cid)
+void Entity::addComponent(Eid eid, Component* c, Cid cid)
 {
 	if (c == nullptr)
 		return;
-	if (eid >= kMaxEid && cid >= Component::numClassIds)
+	if (eid >= kMaxEid && cid >= Component::numCids)
 	{
 		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
@@ -179,9 +179,9 @@ void Entity::addComponent(eidType eid, Component* c, Cid cid)
 		Entity::log(cid);
 }
 
-void Entity::removeComponent(eidType eid, Cid cid)
+void Entity::removeComponent(Eid eid, Cid cid)
 {
-	if (eid >= kMaxEid && cid >= Component::numClassIds)
+	if (eid >= kMaxEid && cid >= Component::numCids)
 	{
 		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
@@ -229,10 +229,10 @@ void Entity::removeComponent(eidType eid, Cid cid)
 		Entity::log(cid);
 }
 
-Entity::Component* Entity::getComponent(eidType eid, Cid cid)
+Entity::Component* Entity::getComponent(Eid eid, Cid cid)
 {
 #if (kTrustPointers == 0)
-	if (eid < kMaxEid && cid < Component::numClassIds)
+	if (eid < kMaxEid && cid < Component::numCids)
 	{
 #endif
 		return components[cid][eid];
@@ -260,7 +260,7 @@ void Entity::log(Cid cid)
 
 void Entity::logAll()
 {
-	for (Cid cid = 0, max = Component::numClassIds; cid < max; cid++)
+	for (Cid cid = 0, max = Component::numCids; cid < max; cid++)
 		Entity::log(cid);
 }
 

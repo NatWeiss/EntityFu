@@ -24,13 +24,13 @@ struct HealthComponent : Entity::Component
 
 	virtual bool isEmpty() const {return maxHP == 0;}
 
-	static Cid classId;
+	static Cid cid;
 };
 
 /// Assign unique class IDs from 0 to `numClassIds` - 1
 static Cid _id = 0;
-Cid HealthComponent::classId = _id++;
-Cid Entity::Component::numClassIds = _id; // also critical to assign `numClassIds`
+Cid HealthComponent::cid = _id++;
+Cid Entity::Component::numCids = _id; // also critical to assign `numClassIds`
 
 /// An example `Ent`.
 struct System::Ent
