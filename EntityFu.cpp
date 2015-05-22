@@ -45,7 +45,7 @@ void Entity::alloc()
 	components = new Component**[max];
 	minEids = new eidType[max];
 	maxEids = new eidType[max];
-	for (int i = 0; i < max; i++)
+	for (Cid i = 0; i < max; i++)
 	{
 		// allocate component array
 		components[i] = new Component*[kMaxEid];
@@ -53,7 +53,7 @@ void Entity::alloc()
 		maxEids[i] = 0;
 		
 		// zero component pointers
-		for (int j = 0; j < kMaxEid; j++)
+		for (Eid j = 0; j < kMaxEid; j++)
 			components[i][j] = nullptr;
 	}
 }
@@ -68,7 +68,7 @@ void Entity::dealloc()
 	
 	if (components != nullptr)
 	{
-		for (int i = 0; i < Component::numClassIds; i++)
+		for (Cid i = 0; i < Component::numClassIds; i++)
 			if (components[i] != nullptr)
 				delete [] components[i]; // note this doesn't destroy the components, just the array
 		delete [] components;
@@ -122,7 +122,7 @@ void Entity::destroyNow(eidType eid)
 	if (verbosity > 0)
 		{Log("Entity %u being destroyed", eid);}
 
-	for (int cid = 0; cid < Component::numClassIds; cid++)
+	for (Cid cid = 0; cid < Component::numClassIds; cid++)
 		Entity::removeComponent(eid, cid);
 	entities[eid] = false;
 }
@@ -134,27 +134,27 @@ void Entity::destroyAll()
 			Entity::destroyNow(eid);
 }
 
-Entity::eidType Entity::getMinEid(int cid)
+Entity::eidType Entity::getMinEid(Cid cid)
 {
-	if ((unsigned)cid < Component::numClassIds)
+	if (cid < Component::numClassIds)
 		return minEids[cid];
 	return kMaxEid - 1;
 }
 
-Entity::eidType Entity::getMaxEid(int cid)
+Entity::eidType Entity::getMaxEid(Cid cid)
 {
-	if ((unsigned)cid < Component::numClassIds)
+	if (cid < Component::numClassIds)
 		return maxEids[cid];
 	return 1;
 }
 
-void Entity::addComponent(eidType eid, Component* c, int cid)
+void Entity::addComponent(eidType eid, Component* c, Cid cid)
 {
 	if (c == nullptr)
 		return;
-	if (eid >= kMaxEid && (unsigned)cid >= Component::numClassIds)
+	if (eid >= kMaxEid && cid >= Component::numClassIds)
 	{
-		Assert2(false, "Invalid eid %u or cid %d", eid, cid);
+		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
 	}
 
@@ -162,7 +162,7 @@ void Entity::addComponent(eidType eid, Component* c, int cid)
 	{
 		Log("");
 		Entity::log(cid);
-		Log("Adding component cid %d eid %u (%x)", cid, eid, (int)(long)c);
+		Log("Adding component cid %u eid %u (%x)", cid, eid, (int)(long)c);
 	}
 
 	// pointers to components are stored in the map
@@ -179,11 +179,11 @@ void Entity::addComponent(eidType eid, Component* c, int cid)
 		Entity::log(cid);
 }
 
-void Entity::removeComponent(eidType eid, int cid)
+void Entity::removeComponent(eidType eid, Cid cid)
 {
-	if (eid >= kMaxEid && (unsigned)cid >= Component::numClassIds)
+	if (eid >= kMaxEid && cid >= Component::numClassIds)
 	{
-		Assert2(false, "Invalid eid %u or cid %d", eid, cid);
+		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
 	}
 
@@ -196,7 +196,7 @@ void Entity::removeComponent(eidType eid, int cid)
 	{
 		Log("");
 		Entity::log(cid);
-		Log("Removing component cid %d eid %u (%x)", cid, eid, (int)(long)ptr);
+		Log("Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);
 	}
 
 	// pointers to components are deleted
@@ -213,7 +213,7 @@ void Entity::removeComponent(eidType eid, int cid)
 		for (; i < kMaxEid - 1 && components[cid][i] == nullptr; i++) {}
 		minEids[cid] = i;
 		if (verbosity > 1)
-			{Log("New min eid %u for cid %d component %x", i, cid, (int)(long)components[cid][i]);}
+			{Log("New min eid %u for cid %u component %x", i, cid, (int)(long)components[cid][i]);}
 	}
 
 	if (eid == maxEids[cid])
@@ -222,17 +222,17 @@ void Entity::removeComponent(eidType eid, int cid)
 		for (; i > 1 && i < kMaxEid - 1 && components[cid][i] == nullptr; i--) {}
 		maxEids[cid] = i;
 		if (verbosity > 1)
-			{Log("New max eid %u for cid %d component %x", i, cid, (int)(long)components[cid][i]);}
+			{Log("New max eid %u for cid %u component %x", i, cid, (int)(long)components[cid][i]);}
 	}
 
 	if (verbosity > 1)
 		Entity::log(cid);
 }
 
-Entity::Component* Entity::getComponent(eidType eid, int cid)
+Entity::Component* Entity::getComponent(eidType eid, Cid cid)
 {
 #if (kTrustPointers == 0)
-	if (eid < kMaxEid && (unsigned)cid < Component::numClassIds)
+	if (eid < kMaxEid && cid < Component::numClassIds)
 	{
 #endif
 		return components[cid][eid];
@@ -243,7 +243,7 @@ Entity::Component* Entity::getComponent(eidType eid, int cid)
 #endif
 }
 
-int Entity::count(int cid)
+int Entity::count(Cid cid)
 {
 	int n = 0;
 	for (auto eid = Entity::getMinEid(cid), eidMax = Entity::getMaxEid(cid); eid <= eidMax; eid++)
@@ -252,15 +252,15 @@ int Entity::count(int cid)
 	return n;
 }
 
-void Entity::log(int cid)
+void Entity::log(Cid cid)
 {
 	auto n = Entity::count(cid);
-	Log("Cid %d has %d entities ranging from %u to %u", cid, n, minEids[cid], maxEids[cid]);
+	Log("Cid %u has %d entities ranging from %u to %u", cid, n, minEids[cid], maxEids[cid]);
 }
 
 void Entity::logAll()
 {
-	for (auto cid = 0, max = Component::numClassIds; cid < max; cid++)
+	for (Cid cid = 0, max = Component::numClassIds; cid < max; cid++)
 		Entity::log(cid);
 }
 

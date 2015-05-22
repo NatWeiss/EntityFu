@@ -6,6 +6,8 @@
 
 #pragma once
 
+typedef unsigned int Cid; // Component-ID
+
 class Entity
 {
 	public:
@@ -36,10 +38,10 @@ class Entity
 		static void destroyAll();
 	
 		/// Return the minimum `Eid` for the given component class.
-		static eidType getMinEid(int componentClass);
+		static eidType getMinEid(Cid componentClass);
 	
 		/// Return the maximum `Eid` for the given component class.
-		static eidType getMaxEid(int componentClass);
+		static eidType getMaxEid(Cid componentClass);
 	
 		/// Add the given component to the given entity.
 		/// Note that components must be allocated with new.
@@ -157,11 +159,11 @@ class Entity
 		~Entity() {}
 		Entity& operator=(const Entity& rhs) {return *this;}
 
-		static void addComponent(eidType eid, Component* c, int componentClass);
-		static void removeComponent(eidType eid, int componentClass);
-		static Component* getComponent(eidType eid, int cid);
-		static int count(int componentClass);
-		static void log(int componentClass);
+		static void addComponent(eidType eid, Component* c, Cid componentClass);
+		static void removeComponent(eidType eid, Cid componentClass);
+		static Component* getComponent(eidType eid, Cid cid);
+		static int count(Cid componentClass);
+		static void log(Cid componentClass);
 		static void logAll();
 
 		static bool* entities;
@@ -198,8 +200,8 @@ struct Entity::Component
 {
 	virtual ~Component() {}
 	virtual bool isEmpty() const = 0;
-	static int numClassIds;
-	// static int classId;
+	static Cid numClassIds;
+	// static Cid classId;
 };
 
 ///
