@@ -1,0 +1,265 @@
+///
+/// C O U R A G E
+///
+
+#include "EntityFu.h"
+#include <stdio.h>
+
+/// Turn this on to have a faster yet riskier ECS.
+#define kTrustPointers 1
+
+/// Auto-define a log method.
+#ifndef Log
+	#define Log(...) {printf(__VA_ARGS__); printf("\n");}
+#endif
+
+/// Auto-define an assert method.
+#ifndef Assert2
+	#define Assert2(...) do {} while (0)
+#endif
+
+/// Turn this to 1 or 2 to debug the ECS.
+static int verbosity = 0;
+
+bool* Entity::entities = nullptr;
+Entity::Component*** Entity::components = nullptr;
+Entity::eidType* Entity::minEids = nullptr;
+Entity::eidType* Entity::maxEids = nullptr;
+
+void Entity::alloc()
+{
+	if (components != nullptr)
+		return;
+	if (verbosity > 0)
+		{Log("Allocing entities");}
+
+	// allocate entities
+	entities = new bool[kMaxEid];
+	for (Eid eid = 0; eid < kMaxEid; ++eid)
+		entities[eid] = false;
+
+	// allocate components
+	auto max = Component::numClassIds;
+	components = new Component**[max];
+	minEids = new eidType[max];
+	maxEids = new eidType[max];
+	for (int i = 0; i < max; i++)
+	{
+		// allocate component array
+		components[i] = new Component*[kMaxEid];
+		minEids[i] = kMaxEid - 1;
+		maxEids[i] = 0;
+		
+		// zero component pointers
+		for (int j = 0; j < kMaxEid; j++)
+			components[i][j] = nullptr;
+	}
+}
+
+void Entity::dealloc()
+{
+	if (verbosity > 0)
+		{Log("Deallocing entities");}
+	
+	if (entities != nullptr)
+		delete [] entities;
+	
+	if (components != nullptr)
+	{
+		for (int i = 0; i < Component::numClassIds; i++)
+			if (components[i] != nullptr)
+				delete [] components[i]; // note this doesn't destroy the components, just the array
+		delete [] components;
+	}
+
+	if (minEids != nullptr)
+		delete [] minEids;
+	if (maxEids != nullptr)
+		delete [] maxEids;
+
+	entities = nullptr;
+	components = nullptr;
+	minEids = nullptr;
+	maxEids = nullptr;
+}
+
+Eid Entity::create()
+{
+	// auto allocate
+	Entity::alloc();
+	
+	eidType eid = 1;
+	for (; eid < kMaxEid && entities[eid]; ++eid)
+	{
+	}
+
+	if (eid < 1 || eid >= kMaxEid)
+		{Log("Maximum number of entities reached!");}
+	else
+		entities[eid] = true;
+
+	if (verbosity > 0)
+		{Log("Entity %u created", eid);}
+	
+	return eid;
+}
+
+int Entity::count()
+{
+	int ret = 0;
+	for (Eid eid = 1; eid < kMaxEid; ++eid)
+		if (entities[eid])
+			++ret;
+	return ret;
+}
+
+void Entity::destroyNow(eidType eid)
+{
+	if (eid == 0)
+		return;
+	if (verbosity > 0)
+		{Log("Entity %u being destroyed", eid);}
+
+	for (int cid = 0; cid < Component::numClassIds; cid++)
+		Entity::removeComponent(eid, cid);
+	entities[eid] = false;
+}
+
+void Entity::destroyAll()
+{
+	for (Eid eid = 1; eid < kMaxEid; ++eid)
+		if (entities[eid])
+			Entity::destroyNow(eid);
+}
+
+Entity::eidType Entity::getMinEid(int cid)
+{
+	if ((unsigned)cid < Component::numClassIds)
+		return minEids[cid];
+	return kMaxEid - 1;
+}
+
+Entity::eidType Entity::getMaxEid(int cid)
+{
+	if ((unsigned)cid < Component::numClassIds)
+		return maxEids[cid];
+	return 1;
+}
+
+void Entity::addComponent(eidType eid, Component* c, int cid)
+{
+	if (c == nullptr)
+		return;
+	if (eid >= kMaxEid && (unsigned)cid >= Component::numClassIds)
+	{
+		Assert2(false, "Invalid eid %u or cid %d", eid, cid);
+		return;
+	}
+
+	if (verbosity > 0)
+	{
+		Log("");
+		Entity::log(cid);
+		Log("Adding component cid %d eid %u (%x)", cid, eid, (int)(long)c);
+	}
+
+	// pointers to components are stored in the map
+	// (components must be allocated with new, not stack objects)
+	components[cid][eid] = c;
+	
+	// store min / max
+	if (eid < minEids[cid])
+		minEids[cid] = eid;
+	if (eid > maxEids[cid])
+		maxEids[cid] = eid;
+
+	if (verbosity > 0)
+		Entity::log(cid);
+}
+
+void Entity::removeComponent(eidType eid, int cid)
+{
+	if (eid >= kMaxEid && (unsigned)cid >= Component::numClassIds)
+	{
+		Assert2(false, "Invalid eid %u or cid %d", eid, cid);
+		return;
+	}
+
+	// get pointer
+	auto ptr = components[cid][eid];
+	if (ptr == nullptr)
+		return;
+
+	if (verbosity > 1)
+	{
+		Log("");
+		Entity::log(cid);
+		Log("Removing component cid %d eid %u (%x)", cid, eid, (int)(long)ptr);
+	}
+
+	// pointers to components are deleted
+	if (ptr != nullptr)
+		delete ptr;
+	
+	// erase the component pointer
+	components[cid][eid] = nullptr;
+
+	// update min / max
+	if (eid == minEids[cid])
+	{
+		auto i = eid;
+		for (; i < kMaxEid - 1 && components[cid][i] == nullptr; i++) {}
+		minEids[cid] = i;
+		if (verbosity > 1)
+			{Log("New min eid %u for cid %d component %x", i, cid, (int)(long)components[cid][i]);}
+	}
+
+	if (eid == maxEids[cid])
+	{
+		auto i = eid;
+		for (; i > 1 && i < kMaxEid - 1 && components[cid][i] == nullptr; i--) {}
+		maxEids[cid] = i;
+		if (verbosity > 1)
+			{Log("New max eid %u for cid %d component %x", i, cid, (int)(long)components[cid][i]);}
+	}
+
+	if (verbosity > 1)
+		Entity::log(cid);
+}
+
+Entity::Component* Entity::getComponent(eidType eid, int cid)
+{
+#if (kTrustPointers == 0)
+	if (eid < kMaxEid && (unsigned)cid < Component::numClassIds)
+	{
+#endif
+		return components[cid][eid];
+
+#if (kTrustPointers == 0)
+	}
+	return nullptr;
+#endif
+}
+
+int Entity::count(int cid)
+{
+	int n = 0;
+	for (auto eid = Entity::getMinEid(cid), eidMax = Entity::getMaxEid(cid); eid <= eidMax; eid++)
+		if (components[cid][eid] != nullptr)
+			n++;
+	return n;
+}
+
+void Entity::log(int cid)
+{
+	auto n = Entity::count(cid);
+	Log("Cid %d has %d entities ranging from %u to %u", cid, n, minEids[cid], maxEids[cid]);
+}
+
+void Entity::logAll()
+{
+	for (auto cid = 0, max = Component::numClassIds; cid < max; cid++)
+		Entity::log(cid);
+}
+
+
