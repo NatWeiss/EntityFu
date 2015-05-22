@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		419BC9A01B0EBA12007C6403 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 419BC99F1B0EBA12007C6403 /* main.cpp */; };
 		419BC9A81B0EBA45007C6403 /* EntityFu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 419BC9A61B0EBA45007C6403 /* EntityFu.cpp */; };
-		419BC9AA1B0EC78E007C6403 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 419BC9A91B0EC78E007C6403 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +29,7 @@
 		419BC9A61B0EBA45007C6403 /* EntityFu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EntityFu.cpp; path = ../EntityFu.cpp; sourceTree = "<group>"; };
 		419BC9A71B0EBA45007C6403 /* EntityFu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EntityFu.h; path = ../EntityFu.h; sourceTree = "<group>"; };
 		419BC9A91B0EC78E007C6403 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		419BC9AB1B0EC8B7007C6403 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +46,7 @@
 		419BC9931B0EBA12007C6403 = {
 			isa = PBXGroup;
 			children = (
+				419BC9AB1B0EC8B7007C6403 /* LICENSE */,
 				419BC9A91B0EC78E007C6403 /* README.md */,
 				419BC9A71B0EBA45007C6403 /* EntityFu.h */,
 				419BC9A61B0EBA45007C6403 /* EntityFu.cpp */,
@@ -118,7 +119,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				419BC9AA1B0EC78E007C6403 /* README.md in Sources */,
 				419BC9A01B0EBA12007C6403 /* main.cpp in Sources */,
 				419BC9A81B0EBA45007C6403 /* EntityFu.cpp in Sources */,
 			);

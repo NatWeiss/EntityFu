@@ -84,7 +84,7 @@ int main(int argc, const char * argv[])
 	while (Entity::count())
 	{
 		HealthSystem::tick(0.1);
-		usleep(1000 * 1000);
+		usleep(1000 * 100);
 	}
 	
 	cout << "Goodbye, World!\n";
