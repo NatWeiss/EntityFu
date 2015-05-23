@@ -7,6 +7,8 @@ Originally built for the game [Songbringer](http://songbringer.com) and adapted 
 
 Only two files need to be included in your game project: `EntityFu.h` and `EntityFu.cpp`.
 
+See `main.cpp` for example code.
+
 Basically:
 - An entity is simply just an integer ID.
 - Components are pure data representing aspects of an entity.
