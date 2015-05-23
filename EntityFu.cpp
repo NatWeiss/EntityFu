@@ -180,7 +180,7 @@ void Entity::removeComponent(Eid eid, Cid cid)
 		Log("Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);
 	}
 
-	auto it = find(eidList[cid]->begin(), eidList[cid]->end(), eid);
+	auto it = std::find(eidList[cid]->begin(), eidList[cid]->end(), eid);
 	if (it != eidList[cid]->end()) // just in case, should never be false
 		eidList[cid]->erase(it);
 
