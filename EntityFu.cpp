@@ -164,7 +164,12 @@ void Entity::addComponent(Eid eid, Component* c, Cid cid)
 		Entity::log(cid);
 		Log("Adding component cid %u eid %u (%x)", cid, eid, (int)(long)c);
 	}
-
+	
+	// if component already added, delete old one
+	auto ptr = components[cid][eid];
+	if (ptr != nullptr)
+		delete ptr;
+		
 	// pointers to components are stored in the map
 	// (components must be allocated with new, not stack objects)
 	components[cid][eid] = c;
@@ -199,9 +204,8 @@ void Entity::removeComponent(Eid eid, Cid cid)
 		Log("Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);
 	}
 
-	// pointers to components are deleted
-	if (ptr != nullptr)
-		delete ptr;
+	// pointers to components are deleted, no need to check if nullptr because of line 197-198
+	delete ptr;
 	
 	// erase the component pointer
 	components[cid][eid] = nullptr;
