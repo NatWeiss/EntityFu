@@ -25,8 +25,7 @@ static int verbosity = 0;
 
 bool* Entity::entities = nullptr;
 Entity::Component*** Entity::components = nullptr;
-Eid* Entity::minEids = nullptr;
-Eid* Entity::maxEids = nullptr;
+std::vector<std::vector<Eid>*> Entity::eidList;
 
 void Entity::alloc()
 {
@@ -43,18 +42,20 @@ void Entity::alloc()
 	// allocate components
 	auto max = Component::numCids;
 	components = new Component**[max];
-	minEids = new Eid[max];
-	maxEids = new Eid[max];
 	for (Cid i = 0; i < max; i++)
 	{
 		// allocate component array
 		components[i] = new Component*[kMaxEid];
-		minEids[i] = kMaxEid - 1;
-		maxEids[i] = 0;
 		
 		// zero component pointers
 		for (Eid j = 0; j < kMaxEid; j++)
 			components[i][j] = nullptr;
+	}
+	
+	eidList.assign(max, nullptr);
+	for (auto&& list : eidList) {
+		list = new std::vector<Eid>;
+		list->reserve(kMaxEid);
 	}
 }
 
@@ -74,15 +75,11 @@ void Entity::dealloc()
 		delete [] components;
 	}
 
-	if (minEids != nullptr)
-		delete [] minEids;
-	if (maxEids != nullptr)
-		delete [] maxEids;
-
 	entities = nullptr;
 	components = nullptr;
-	minEids = nullptr;
-	maxEids = nullptr;
+	
+	for (auto&& list : eidList) delete list;
+	eidList.clear();
 }
 
 Eid Entity::create()
@@ -108,10 +105,10 @@ Eid Entity::create()
 
 int Entity::count()
 {
-	int ret = 0;
-	for (Eid eid = 1; eid < kMaxEid; ++eid)
-		if (entities[eid])
-			++ret;
+-	int ret = 0;
+-	for (Eid eid = 1; eid < kMaxEid; ++eid)
+-		if (entities[eid])
+-			++ret;
 	return ret;
 }
 
@@ -134,25 +131,12 @@ void Entity::destroyAll()
 			Entity::destroyNow(eid);
 }
 
-Eid Entity::getMinEid(Cid cid)
-{
-	if (cid < Component::numCids)
-		return minEids[cid];
-	return kMaxEid - 1;
-}
-
-Eid Entity::getMaxEid(Cid cid)
-{
-	if (cid < Component::numCids)
-		return maxEids[cid];
-	return 1;
-}
 
 void Entity::addComponent(Eid eid, Component* c, Cid cid)
 {
 	if (c == nullptr)
 		return;
-	if (eid >= kMaxEid && cid >= Component::numCids)
+	if (eid >= kMaxEid || !entities[eid] || cid >= Component::numCids)
 	{
 		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
@@ -167,13 +151,10 @@ void Entity::addComponent(Eid eid, Component* c, Cid cid)
 
 	// pointers to components are stored in the map
 	// (components must be allocated with new, not stack objects)
+	auto ptr = components[cid][eid];
+	if (ptr != nullptr) delete ptr;
+	else eidList[cid]->push_back(eid);
 	components[cid][eid] = c;
-	
-	// store min / max
-	if (eid < minEids[cid])
-		minEids[cid] = eid;
-	if (eid > maxEids[cid])
-		maxEids[cid] = eid;
 
 	if (verbosity > 0)
 		Entity::log(cid);
@@ -181,7 +162,7 @@ void Entity::addComponent(Eid eid, Component* c, Cid cid)
 
 void Entity::removeComponent(Eid eid, Cid cid)
 {
-	if (eid >= kMaxEid && cid >= Component::numCids)
+	if (eid >= kMaxEid || !entities[eid] || cid >= Component::numCids)
 	{
 		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
@@ -199,31 +180,15 @@ void Entity::removeComponent(Eid eid, Cid cid)
 		Log("Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);
 	}
 
+	auto it = find(eidList[cid]->begin(), eidList[cid]->end(), eid);
+	if (it != eidList[cid]->end()) // just in case, should never be false
+		eidList[cid]->erase(it);
+
 	// pointers to components are deleted
-	if (ptr != nullptr)
-		delete ptr;
+	delete ptr;
 	
 	// erase the component pointer
 	components[cid][eid] = nullptr;
-
-	// update min / max
-	if (eid == minEids[cid])
-	{
-		auto i = eid;
-		for (; i < kMaxEid - 1 && components[cid][i] == nullptr; i++) {}
-		minEids[cid] = i;
-		if (verbosity > 1)
-			{Log("New min eid %u for cid %u component %x", i, cid, (int)(long)components[cid][i]);}
-	}
-
-	if (eid == maxEids[cid])
-	{
-		auto i = eid;
-		for (; i > 1 && i < kMaxEid - 1 && components[cid][i] == nullptr; i--) {}
-		maxEids[cid] = i;
-		if (verbosity > 1)
-			{Log("New max eid %u for cid %u component %x", i, cid, (int)(long)components[cid][i]);}
-	}
 
 	if (verbosity > 1)
 		Entity::log(cid);
@@ -243,13 +208,9 @@ Entity::Component* Entity::getComponent(Eid eid, Cid cid)
 #endif
 }
 
-int Entity::count(Cid cid)
+size_t Entity::count(Cid cid)
 {
-	int n = 0;
-	for (auto eid = Entity::getMinEid(cid), eidMax = Entity::getMaxEid(cid); eid <= eidMax; eid++)
-		if (components[cid][eid] != nullptr)
-			n++;
-	return n;
+	return eidList[cid]->size();
 }
 
 void Entity::log(Cid cid)
