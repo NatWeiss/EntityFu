@@ -32,7 +32,7 @@ class Entity
 		static Eid create();
 
 		/// Return a count of all entities.
-		static size_t count();
+		static int count();
 	
 		/// Destroy an entity and all its components right now.
 		static void destroyNow(Eid eid);
