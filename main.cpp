@@ -50,14 +50,12 @@ struct HealthSystem : System
 	static void tick(double fixedDelta)
 	{
 		// for this example, just decrement all health components each tick
-		forAllEntities(HealthComponent)
+	
+		// always use reference for list to avoid copy!!!
+		auto const & list = Entity::getEidList<HealthComponent>();
+		for (auto && eid : list)
 		{
 			Ent e(eid);
-			
-			// always double check the `eid` is good because sometimes it is necessary for
-			// `forAllEntities` to loop over a range that doesn't have active entities
-			if (e.health.isEmpty())
-				continue;
 			
 			// decrement
 			e.health.hp--;
@@ -85,6 +83,7 @@ int main(int argc, const char * argv[])
 		usleep(1000 * 100);
 	}
 	
+	Entity::dealloc();
 	cout << "Goodbye, World!\n";
     return 0;
 }

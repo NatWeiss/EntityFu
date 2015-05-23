@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <vector>
+
 /// An `Eid` is an entity ID.
 typedef unsigned Eid;
 
@@ -37,12 +39,6 @@ class Entity
 	
 		/// Destroy all entities and components right now.
 		static void destroyAll();
-	
-		/// Return the minimum `Eid` for the given `Cid`.
-		static Eid getMinEid(Cid cid);
-	
-		/// Return the maximum `Eid` for the given `Cid`.
-		static Eid getMaxEid(Cid cid);
 	
 		/// Add the given component to the given entity.
 		/// Note that components must be allocated with new.
@@ -76,9 +72,13 @@ class Entity
 		}
 	
 		/// Count all the entities with the given component class.
-		template<class ComponentClass> inline static int count()
+		template<class ComponentClass> inline static size_t count()
 		{
 			return Entity::count(ComponentClass::cid);
+		}
+		
+		template<class ComponentClass> static std::vector<Eid> const & getEidList() {
+			return *Entity::eidList.at(ComponentClass::cid);
 		}
 
 		/// Create an entity with some components.
@@ -163,14 +163,13 @@ class Entity
 		static void addComponent(Eid eid, Component* c, Cid cid);
 		static void removeComponent(Eid eid, Cid cid);
 		static Component* getComponent(Eid eid, Cid cid);
-		static int count(Cid cid);
+		static size_t count(Cid cid);
 		static void log(Cid cid);
 		static void logAll();
 
 		static bool* entities;
 		static Component*** components;
-		static Eid* minEids;
-		static Eid* maxEids;
+		static std::vector<std::vector<Eid>*> eidList;
 
 		/// Get a guaranteed reference to a component.
 		template<class ComponentClass> static ComponentClass& ref(ComponentClass* p)
@@ -180,11 +179,6 @@ class Entity
 			return s;
 		}
 };
-
-/// Loop over all the entities of a given component class.
-/// Use the variable `eid` to get the components.
-/// Ensure that the `eid` actually has the given component class with `Entity::hasComponent`, `Entity::getPointer` or `Entity::get`.
-#define forAllEntities(c) for (auto eid = Entity::getMinEid(c::cid), eidMax = Entity::getMaxEid(c::cid); eid <= eidMax; eid++)
 
 ///
 /// Component
