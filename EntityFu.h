@@ -78,7 +78,7 @@ class Entity
 		}
 		
 		template<class ComponentClass> static std::vector<Eid> const & getEidList() {
-			return *Entity::eidList[ComponentClass::cid];
+			return *Entity::eidList.at(ComponentClass::cid);
 		}
 
 		/// Create an entity with some components.
