@@ -37,6 +37,7 @@ struct System::Ent
 {
 	Eid id;
 	HealthComponent& health;
+	/// Add more components your systems will use frequently
 
 	Ent(Eid _id) :
 		health(Entity::get<HealthComponent>(_id)),
@@ -50,12 +51,11 @@ struct HealthSystem : System
 	static void tick(double fixedDelta)
 	{
 		// for this example, just decrement all health components each tick
-		forAllEntities(HealthComponent)
+		for (auto eid : Entity::getAll<HealthComponent>())
 		{
 			Ent e(eid);
 			
-			// always double check the `eid` is good because sometimes it is necessary for
-			// `forAllEntities` to loop over a range that doesn't have active entities
+			// this is overly pragmatic, but you get the drift of how to check if a component is valid
 			if (e.health.isEmpty())
 				continue;
 			
@@ -74,7 +74,7 @@ struct HealthSystem : System
 
 int main(int argc, const char * argv[])
 {
-	// create an entity with one component
+	// create some entities
 	Entity::create(new HealthComponent(100, 100));
 	Entity::create(new HealthComponent(7, 7));
 	
@@ -85,6 +85,7 @@ int main(int argc, const char * argv[])
 		usleep(1000 * 100);
 	}
 	
+	Entity::dealloc();
 	cout << "Goodbye, World!\n";
     return 0;
 }
