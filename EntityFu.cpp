@@ -124,7 +124,7 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 {
 	if (c == nullptr)
 		return;
-	if (eid >= kMaxEntities || cid >= Component::numCids)
+	if (eid >= kMaxEntities || !entities[eid] || cid >= Component::numCids)
 	{
 		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
@@ -153,7 +153,7 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 
 void Entity::removeComponent(Cid cid, Eid eid)
 {
-	if (eid >= kMaxEntities || cid >= Component::numCids)
+	if (eid >= kMaxEntities || !entities[eid] || cid >= Component::numCids)
 	{
 		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
