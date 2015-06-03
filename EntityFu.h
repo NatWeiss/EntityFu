@@ -84,22 +84,10 @@ class Entity
 		template <typename ...Args> static Eid create(Args... args)
 		{
 			auto eid = Entity::create();
-			addComponents(eid, args...);
+			Entity::addComponents(eid, args...);
 			return eid;
 		}
 		
-	private:
-		template <class C> static void addComponents(Eid eid, C* c)
-		{
-			Entity::addComponent(C::cid, eid, c);
-		}
-
-		template <class C, typename ...Args> static void addComponents(Eid eid, C* c, Args... args)
-		{
-			Entity::addComponent(C::cid, eid, c);
-			addComponents(eid, args...);
-		}
-
 	private:
 		/// Disallow construction. Entities are not classes!
 		Entity() {}
@@ -125,6 +113,19 @@ class Entity
 			if (p) return *p;
 			static ComponentClass s;
 			return s;
+		}
+
+		/// The variadic template version of `addComponents`.
+		template <class C, typename ...Args> static void addComponents(Eid eid, C* c, Args... args)
+		{
+			Entity::addComponent(C::cid, eid, c);
+			Entity::addComponents(eid, args...);
+		}
+
+		/// The final call to `addComponents`.
+		template <class C> static void addComponents(Eid eid, C* c)
+		{
+			Entity::addComponent(C::cid, eid, c);
 		}
 };
 

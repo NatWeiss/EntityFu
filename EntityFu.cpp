@@ -22,6 +22,7 @@ using namespace std;
 #endif
 
 /// Turn this to 1 or 2 to debug the ECS.
+/// 1 == log creation, 2 == log creation and deletion.
 static int verbosity = 0;
 
 bool* Entity::entities = nullptr;
