@@ -81,74 +81,23 @@ class Entity
 
 		/// Create an entity with some components.
 		/// Convenience method which calls `Entity::create()` and `Entity::addComponent`.
-		template<class C1> static Eid create(C1* c1)
+		template <typename ...Args> static Eid create(Args... args)
 		{
 			auto eid = Entity::create();
-			Entity::addComponent(C1::cid, eid, c1);
+			addComponents(eid, args...);
 			return eid;
 		}
-
-		template<class C1, class C2> static Eid create(C1* c1, C2* c2)
+		
+	private:
+		template <class C> static void addComponents(Eid eid, C* c)
 		{
-			auto eid = Entity::create();
-			Entity::addComponent(C1::cid, eid, c1);
-			Entity::addComponent(C2::cid, eid, c2);
-			return eid;
+			Entity::addComponent(C::cid, eid, c);
 		}
 
-		template<class C1, class C2, class C3> static Eid create(C1* c1, C2* c2, C3* c3)
+		template <class C, typename ...Args> static void addComponents(Eid eid, C* c, Args... args)
 		{
-			auto eid = Entity::create();
-			Entity::addComponent(C1::cid, eid, c1);
-			Entity::addComponent(C2::cid, eid, c2);
-			Entity::addComponent(C3::cid, eid, c3);
-			return eid;
-		}
-
-		template<class C1, class C2, class C3, class C4> static Eid create(C1* c1, C2* c2, C3* c3, C4* c4)
-		{
-			auto eid = Entity::create();
-			Entity::addComponent(C1::cid, eid, c1);
-			Entity::addComponent(C2::cid, eid, c2);
-			Entity::addComponent(C3::cid, eid, c3);
-			Entity::addComponent(C4::cid, eid, c4);
-			return eid;
-		}
-
-		template<class C1, class C2, class C3, class C4, class C5> static Eid create(C1* c1, C2* c2, C3* c3, C4* c4, C5* c5)
-		{
-			auto eid = Entity::create();
-			Entity::addComponent(C1::cid, eid, c1);
-			Entity::addComponent(C2::cid, eid, c2);
-			Entity::addComponent(C3::cid, eid, c3);
-			Entity::addComponent(C4::cid, eid, c4);
-			Entity::addComponent(C5::cid, eid, c5);
-			return eid;
-		}
-
-		template<class C1, class C2, class C3, class C4, class C5, class C6> static Eid create(C1* c1, C2* c2, C3* c3, C4* c4, C5* c5, C6* c6)
-		{
-			auto eid = Entity::create();
-			Entity::addComponent(C1::cid, eid, c1);
-			Entity::addComponent(C2::cid, eid, c2);
-			Entity::addComponent(C3::cid, eid, c3);
-			Entity::addComponent(C4::cid, eid, c4);
-			Entity::addComponent(C5::cid, eid, c5);
-			Entity::addComponent(C6::cid, eid, c6);
-			return eid;
-		}
-
-		template<class C1, class C2, class C3, class C4, class C5, class C6, class C7> static Eid create(C1* c1, C2* c2, C3* c3, C4* c4, C5* c5, C6* c6, C7* c7)
-		{
-			auto eid = Entity::create();
-			Entity::addComponent(C1::cid, eid, c1);
-			Entity::addComponent(C2::cid, eid, c2);
-			Entity::addComponent(C3::cid, eid, c3);
-			Entity::addComponent(C4::cid, eid, c4);
-			Entity::addComponent(C5::cid, eid, c5);
-			Entity::addComponent(C6::cid, eid, c6);
-			Entity::addComponent(C7::cid, eid, c7);
-			return eid;
+			Entity::addComponent(C::cid, eid, c);
+			addComponents(eid, args...);
 		}
 
 	private:
