@@ -17,8 +17,8 @@ using namespace std;
 #endif
 
 /// Auto-define an assert method.
-#ifndef Assert2
-	#define Assert2(...) do {} while (0)
+#ifndef Assert
+	#define Assert(condition, format, ...) {if(!condition) throw format;}
 #endif
 
 /// Turn this to 1 or 2 to debug the ECS.
@@ -92,12 +92,16 @@ Eid Entity::create()
 	}
 
 	if (eid < 1 || eid >= kMaxEntities)
-		{Log("Maximum number of entities reached!");} // this should probably be an assertion
+	{
+		Assert(false, "Maximum number of entities reached!");
+		eid = 0;
+	}
 	else
+	{
 		entities[eid] = true;
-
-	if (verbosity > 0)
-		{Log("Entity %u created", eid);}
+		if (verbosity > 0)
+			{Log("Entity %u created", eid);}
+	}
 	
 	return eid;
 }
@@ -127,7 +131,7 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 		return;
 	if (eid >= kMaxEntities || !entities[eid] || cid >= Component::numCids)
 	{
-		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
+		Assert(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
 	}
 	if (verbosity > 0)
@@ -156,7 +160,7 @@ void Entity::removeComponent(Cid cid, Eid eid)
 {
 	if (eid >= kMaxEntities || !entities[eid] || cid >= Component::numCids)
 	{
-		Assert2(false, "Invalid eid %u or cid %u", eid, cid);
+		Assert(false, "Invalid eid %u or cid %u", eid, cid);
 		return;
 	}
 
