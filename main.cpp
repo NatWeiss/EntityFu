@@ -50,8 +50,14 @@ struct HealthSystem : System
 {
 	static void tick(double fixedDelta)
 	{
+		// create a copy of the vector<Eid> for all health components so we
+		// don't cause an assertion failure: "vector iterator not incrementable"
+		// for more speed you can instead loop over a reference as long as you schedule
+		// Entity::destroyNow for after the loop
+		auto all = Entity::getAll<HealthComponent>();
+
 		// for this example, just decrement all health components each tick
-		for (auto eid : Entity::getAll<HealthComponent>())
+		for (auto eid : all)
 		{
 			Ent e(eid);
 			
