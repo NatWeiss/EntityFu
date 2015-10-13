@@ -226,6 +226,11 @@ unsigned Entity::count()
 	return ret;
 }
 
+bool Entity::exists(Eid eid)
+{
+	return entities != nullptr && entities[eid];
+}
+
 unsigned Entity::count(Cid cid)
 {
 	return (unsigned)Entity::getAll(cid).size();
