@@ -217,10 +217,18 @@ const vector<Eid>& Entity::getAll(Cid cid)
 unsigned Entity::count()
 {
 	int ret = 0;
-	for (Eid eid = 1; eid < kMaxEntities; ++eid)
-		if (entities[eid])
-			++ret;
+	if(entities != nullptr)
+	{
+		for (Eid eid = 1; eid < kMaxEntities; ++eid)
+			if (entities[eid])
+				++ret;
+	}
 	return ret;
+}
+
+bool Entity::exists(Eid eid)
+{
+	return entities != nullptr && entities[eid];
 }
 
 unsigned Entity::count(Cid cid)
