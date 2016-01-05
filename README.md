@@ -20,7 +20,7 @@ Here's an [intro to entity component systems](http://www.raywenderlich.com/24878
 Ports
 -----
 
-[@bwoogie](https://twitter.com/bwoogie) [ported Entity Fu to C#](https://github.com/bwoogie/EntityFu)
+[@bwoogie](https://twitter.com/bwoogie) ported [Entity Fu to C#](https://github.com/bwoogie/EntityFu)
 
 
 License
