@@ -143,7 +143,7 @@ class Entity
 struct Entity::Component
 {
 	virtual ~Component() {}
-	virtual bool isEmpty() const = 0;
+	virtual bool empty() const = 0;
 	static Cid numCids;
 	// static Cid cid;
 };
