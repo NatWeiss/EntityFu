@@ -5,6 +5,7 @@
 ///
 
 #include "EntityFu.h"
+#include <algorithm>
 using namespace std;
 
 /// Turn this on to have a faster yet riskier ECS.
@@ -136,7 +137,7 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 	}
 	if (verbosity > 0)
 	{
-		Log("");
+		Log(" ");
 		Entity::log(cid);
 		Log("Adding component cid %u eid %u (%x)", cid, eid, (int)(long)c);
 	}
@@ -171,7 +172,7 @@ void Entity::removeComponent(Cid cid, Eid eid)
 
 	if (verbosity > 1)
 	{
-		Log("");
+		Log(" ");
 		Entity::log(cid);
 		Log("Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);
 	}
@@ -217,7 +218,7 @@ const vector<Eid>& Entity::getAll(Cid cid)
 unsigned Entity::count()
 {
 	int ret = 0;
-	if(entities != nullptr)
+	if (entities != nullptr)
 	{
 		for (Eid eid = 1; eid < kMaxEntities; ++eid)
 			if (entities[eid])
@@ -226,14 +227,14 @@ unsigned Entity::count()
 	return ret;
 }
 
-bool Entity::exists(Eid eid)
-{
-	return entities != nullptr && entities[eid];
-}
-
 unsigned Entity::count(Cid cid)
 {
 	return (unsigned)Entity::getAll(cid).size();
+}
+
+bool Entity::exists(Eid eid)
+{
+	return entities != nullptr && entities[eid];
 }
 
 void Entity::log(Cid cid)

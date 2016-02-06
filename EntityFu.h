@@ -32,8 +32,8 @@ class Entity
 
 		/// Return a count of all entities.
 		static unsigned count();
-	
-		/// Check if the entity was already created
+
+		/// Return true if the entity has been created.
 		static bool exists(Eid eid);
 	
 		/// Destroy an entity and all its components right now.
