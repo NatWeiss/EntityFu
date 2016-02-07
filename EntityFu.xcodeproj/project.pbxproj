@@ -89,7 +89,7 @@
 		419BC9941B0EBA12007C6403 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "Wizard Fu, Inc.";
 				TargetAttributes = {
 					419BC99B1B0EBA12007C6403 = {
