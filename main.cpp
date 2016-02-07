@@ -22,7 +22,7 @@ struct HealthComponent : Entity::Component
 	
 	HealthComponent() : HealthComponent(0, 0) {}
 
-	virtual bool isEmpty() const {return maxHP == 0;}
+	virtual bool empty() const {return maxHP == 0;}
 
 	static Cid cid;
 };
@@ -62,7 +62,7 @@ struct HealthSystem : System
 			Ent e(eid);
 			
 			// this is overly pragmatic, but you get the drift of how to check if a component is valid
-			if (e.health.isEmpty())
+			if (e.health.empty())
 				continue;
 			
 			// decrement

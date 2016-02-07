@@ -136,7 +136,7 @@ class Entity
 /// Component
 ///
 /// Inherit your game's components from this class.
-/// Give your component some data and be sure to implement the `isEmpty` method.
+/// Give your component some data and be sure to implement the `empty` method.
 /// Also give your component class a static member `cid` of type `Cid` and increment `Entity::Component::numCids`.
 /// See the example code for details.
 ///
