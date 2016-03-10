@@ -251,4 +251,9 @@ void Entity::logAll()
 		Entity::log(cid);
 }
 
+bool Entity::Component::full() const
+{
+	return !this->empty();
+}
+
 

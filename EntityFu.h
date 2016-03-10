@@ -19,7 +19,7 @@ class Entity
 		struct Component;
 
 		/// The maximum number of entities. Increase this if you need more.
-		enum {kMaxEntities = 4096};
+		enum {kMaxEntities = 8192};
 
 		/// Allocate the memory for entities and components. Can call this manually or let it allocate automatically.
 		static void alloc();
@@ -144,9 +144,18 @@ struct Entity::Component
 {
 	virtual ~Component() {}
 	virtual bool empty() const = 0;
+	virtual bool full() const;
 	static Cid numCids;
 	// static Cid cid;
 };
+
+///
+/// Convenience macro to get a reference to a component or else run some code.
+/// Example: Entity__get(eid, health, HealthComponent, continue);
+///
+#define Entity__get(componentClass, eid, varName, orElseCode) \
+	auto& (varName) = Entity::get<componentClass>((eid)); \
+	if ((varName).empty()) orElseCode;
 
 ///
 /// System
