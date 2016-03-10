@@ -113,7 +113,8 @@ class Entity
 		/// Get a guaranteed reference to a component.
 		template<class ComponentClass> static ComponentClass& ref(ComponentClass* p)
 		{
-			if (p) return *p;
+			if (p != nullptr)
+				return *p;
 			static ComponentClass s;
 			return s;
 		}
