@@ -11,24 +11,41 @@ using namespace std;
 /// Turn this on to have a faster yet riskier ECS.
 #define kTrustPointers 0
 
-/// Auto-define a log method.
+/// Log macro.
 #ifndef Log
+#ifndef NDEBUG
 	#include <stdio.h>
 	#define Log(...) {printf(__VA_ARGS__); printf("\n");}
+#else
+	#define Log(...) do {} while (0)
+#endif
 #endif
 
-/// Auto-define an assert method.
+/// Assert macro.
 #ifndef Assert
+#ifndef NDEBUG
 	#define Assert(condition, format, ...) {if(!condition) throw format;}
+#else
+	#define Assert(...) do {} while (0)
+#endif
 #endif
 
 /// Turn this to 1 or 2 to debug the ECS.
 /// 1 == log creation, 2 == log creation and deletion.
 static int verbosity = 0;
 
-bool* Entity::entities = nullptr;
-Entity::Component*** Entity::components = nullptr;
-vector<Eid>* Entity::componentEids = nullptr;
+/// Static pointers to the ECS data.
+static bool* entities = nullptr;
+static Entity::Component*** components = nullptr;
+static vector<Eid>* componentEids = nullptr;
+
+static void log(Cid cid)
+{
+	auto n = Entity::count(cid);
+	auto& eids = Entity::getAll(cid);
+	if (eids.size() > 0)
+		{Log("Cid %u has %d entities ranging from %u to %u", cid, n, eids.front(), eids.back());}
+}
 
 void Entity::alloc()
 {
@@ -138,7 +155,7 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 	if (verbosity > 0)
 	{
 		Log(" ");
-		Entity::log(cid);
+		log(cid);
 		Log("Adding component cid %u eid %u (%x)", cid, eid, (int)(long)c);
 	}
 	
@@ -154,7 +171,7 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 	componentEids[cid].push_back(eid);
 
 	if (verbosity > 0)
-		Entity::log(cid);
+		log(cid);
 }
 
 void Entity::removeComponent(Cid cid, Eid eid)
@@ -173,7 +190,7 @@ void Entity::removeComponent(Cid cid, Eid eid)
 	if (verbosity > 1)
 	{
 		Log(" ");
-		Entity::log(cid);
+		log(cid);
 		Log("Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);
 	}
 
@@ -190,7 +207,7 @@ void Entity::removeComponent(Cid cid, Eid eid)
 		it = eids.erase(it);
 	
 	if (verbosity > 1)
-		Entity::log(cid);
+		log(cid);
 }
 
 Entity::Component* Entity::getComponent(Cid cid, Eid eid)
@@ -237,19 +254,9 @@ bool Entity::exists(Eid eid)
 	return entities != nullptr && entities[eid];
 }
 
-void Entity::log(Cid cid)
-{
-	auto n = Entity::count(cid);
-	auto& eids = Entity::getAll(cid);
-	if (eids.size() > 0)
-		{Log("Cid %u has %d entities ranging from %u to %u", cid, n, eids.front(), eids.back());}
-}
-
-void Entity::logAll()
-{
-	for (Cid cid = 0, max = Component::numCids; cid < max; cid++)
-		Entity::log(cid);
-}
+//
+// Entity::Component
+//
 
 bool Entity::Component::full() const
 {
