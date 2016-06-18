@@ -129,7 +129,7 @@ namespace Entity
 ///
 struct Entity::Component
 {
-	virtual ~Component() {}
+	virtual ~Component();
 	virtual bool empty() const = 0;
 	virtual bool full() const;
 	static Cid numCids;
@@ -157,8 +157,8 @@ class System
 	public:
 		struct Ent;
 	
-		static void tick(double fixedDelta) {}
-		static void animate(double delta, double tickPercent) {}
+		static void tick(double fixedDelta);
+		static void animate(double delta, double tickPercent);
 };
 
 

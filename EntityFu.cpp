@@ -12,12 +12,12 @@ using namespace std;
 #define kTrustPointers 0
 
 /// Log macro.
-#ifndef Log
+#ifndef LogV
 #ifndef NDEBUG
 	#include <stdio.h>
-	#define Log(...) {printf(__VA_ARGS__); printf("\n");}
+	#define LogV(verbosity, minVerbosity, ...) do {if ((verbosity) >= (minVerbosity)) {printf(__VA_ARGS__); printf("\n");}} while (0)
 #else
-	#define Log(...) do {} while (0)
+	#define LogV(...) do {} while (0)
 #endif
 #endif
 
@@ -41,20 +41,17 @@ static vector<Eid>* componentEids = nullptr;
 
 static void log(Cid cid)
 {
-	if (verbosity < 4)
-		return;
 	auto n = Entity::count(cid);
 	auto& eids = Entity::getAll(cid);
 	if (eids.size() > 0)
-		{Log("  Cid %u has %d entities ranging from %u to %u", cid, n, eids.front(), eids.back());}
+		LogV(verbosity, 4, "  Cid %u has %d entities ranging from %u to %u", cid, n, eids.front(), eids.back());
 }
 
 void Entity::alloc()
 {
 	if (components != nullptr)
 		return;
-	if (verbosity >= 1)
-		{Log("Allocing entities");}
+	LogV(verbosity, 1, "Allocing entities");
 
 	// allocate entities
 	entities = new bool[kMaxEntities];
@@ -78,8 +75,7 @@ void Entity::alloc()
 
 void Entity::dealloc()
 {
-	if (verbosity >= 1)
-		{Log("Deallocing entities");}
+	LogV(verbosity, 1, "Deallocing entities");
 	
 	if (components != nullptr)
 	{
@@ -119,8 +115,7 @@ Eid Entity::create()
 	else
 	{
 		entities[eid] = true;
-		if (verbosity >= 1)
-			{Log("Entity %u created", eid);}
+		LogV(verbosity, 1, "Entity %u created", eid);
 	}
 	
 	return eid;
@@ -130,8 +125,7 @@ void Entity::destroyNow(Eid eid)
 {
 	if (eid == 0)
 		return;
-	if (verbosity >= 1)
-		{Log("Entity %u being destroyed", eid);}
+	LogV(verbosity, 1, "Entity %u being destroyed", eid);
 
 	for (Cid cid = 0; cid < Component::numCids; cid++)
 		Entity::removeComponent(cid, eid);
@@ -152,8 +146,7 @@ void Entity::destroyAll()
 		}
 	}
 	verbosity = oldVerbosity;
-	if (verbosity >= 1)
-		{Log("%u entities destroyed", count);}
+	LogV(verbosity, 1, "%u entities destroyed", count);
 }
 
 void Entity::addComponent(Cid cid, Eid eid, Component* c)
@@ -166,10 +159,9 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 		return;
 	}
 
-	log(cid);
-
-	if (verbosity >= 3)
-		{Log("    Adding component cid %u eid %u (%x)", cid, eid, (int)(long)c);}
+	if (verbosity >= 4)
+		log(cid);
+	LogV(verbosity, 3, "    Adding component cid %u eid %u (%x)", cid, eid, (int)(long)c);
 	
 	// if component already added, delete old one
 	if (components[cid][eid] != nullptr)
@@ -182,7 +174,8 @@ void Entity::addComponent(Cid cid, Eid eid, Component* c)
 	// store component eids
 	componentEids[cid].push_back(eid);
 
-	log(cid);
+	if (verbosity >= 4)
+		log(cid);
 }
 
 void Entity::removeComponent(Cid cid, Eid eid)
@@ -198,10 +191,9 @@ void Entity::removeComponent(Cid cid, Eid eid)
 	if (ptr == nullptr)
 		return;
 
-	log(cid);
-
-	if (verbosity >= 3)
-		{Log("    Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);}
+	if (verbosity >= 4)
+		log(cid);
+	LogV(verbosity, 3, "    Removing component cid %u eid %u (%x)", cid, eid, (int)(long)ptr);
 
 	// pointers to components are deleted
 	delete ptr;
@@ -215,7 +207,8 @@ void Entity::removeComponent(Cid cid, Eid eid)
 	if (it != eids.end())
 		it = eids.erase(it);
 	
-	log(cid);
+	if (verbosity >= 4)
+		log(cid);
 }
 
 Entity::Component* Entity::getComponent(Cid cid, Eid eid)
@@ -266,9 +259,25 @@ bool Entity::exists(Eid eid)
 // Entity::Component
 //
 
+Entity::Component::~Component()
+{
+}
+
 bool Entity::Component::full() const
 {
 	return !this->empty();
+}
+
+//
+// System
+//
+
+void System::tick(double fixedDelta)
+{
+}
+
+void System::animate(double delta, double tickPercent)
+{
 }
 
 
