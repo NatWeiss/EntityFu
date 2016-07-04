@@ -9,9 +9,11 @@
 
 #ifdef _WIN32
 	#include <windows.h>
-#else // !_WIN32
-	#include <uinstd.h>
-#endif // _WIN32
+	#define _sleep(ms) Sleep(ms)
+#else
+	#include <unistd.h>
+	#define _sleep(ms) usleep(ms * 1000)
+#endif
 
 using namespace std;
 
@@ -94,16 +96,12 @@ int main(int argc, const char * argv[])
 	while (Entity::count())
 	{
 		HealthSystem::tick(0.1);
-#ifdef _WIN32
-		Sleep(100);
-#else // !_WIN32
-		usleep(1000 * 100);
-#endif // _WIN32
+		_sleep(100);
 	}
 	
 	Entity::dealloc();
 	cout << "Goodbye, World!\n";
-    	return 0;
+	return 0;
 }
 
 
