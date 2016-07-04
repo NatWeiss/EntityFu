@@ -6,7 +6,13 @@
 
 #include "EntityFu.h"
 #include <iostream>
-#include <unistd.h>
+
+#ifdef _WIN32
+	#include <windows.h>
+#else // !_WIN32
+	#include <uinstd.h>
+#endif // _WIN32
+
 using namespace std;
 
 /// An example component.
@@ -88,7 +94,11 @@ int main(int argc, const char * argv[])
 	while (Entity::count())
 	{
 		HealthSystem::tick(0.1);
+#ifdef _WIN32
+		Sleep(100);
+#else // !_WIN32
 		usleep(1000 * 100);
+#endif // _WIN32
 	}
 	
 	Entity::dealloc();
